@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Egyptian Landmark Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        #game-container {
+            background-color: #fff;
+            border: 2px solid #2c3e50;
+            padding: 20px;
+            display: inline-block;
+            border-radius: 8px;
+        }
+        .clue {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            font-size: 16px;
+            width: 300px;
+            border: 2px solid #2c3e50;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #34495e;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #score {
+            font-size: 20px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Guess the Egyptian Landmark Game</h1>
+    <div id="game-container">
+        <div id="question-container">
+            <p class="clue">Clue: "This ancient structure is one of the Seven Wonders of the Ancient World."</p>
+            <input type="text" id="user-input" placeholder="Enter your guess here..." />
+            <button type="button" onclick="checkAnswer()">Submit Answer</button>
+        </div>
+        <div id="result"></div>
+        <div id="score"></div>
+    </div>
+
+    <script>
+        // Game data with 100+ landmarks and clues
+        const landmarks = [
+            { name: "Pyramids of Giza", clue: "This ancient structure is one of the Seven Wonders of the Ancient World." },
+            { name: "The Sphinx", clue: "This mythical creature has the body of a lion and the head of a pharaoh." },
+            { name: "Luxor Temple", clue: "This temple is located in the city of Luxor, dedicated to the gods Amun, Mut, and Khonsu." },
+            { name: "Karnak Temple", clue: "This vast temple complex is located in Luxor and was built over 2,000 years." },
+            { name: "Valley of the Kings", clue: "This site contains the tombs of many pharaohs, including that of King Tutankhamun." },
+            { name: "Abu Simbel", clue: "These massive rock temples were carved into a mountainside during the reign of Ramses II." },
+            { name: "Great Temple of Ptah", clue: "Located in Memphis, this temple was dedicated to the god Ptah." },
+            { name: "Temple of Horus", clue: "This temple at Edfu is dedicated to the god Horus and is one of the best-preserved temples in Egypt." },
+            { name: "The Step Pyramid of Djoser", clue: "This early pyramid in Saqqara was designed by the architect Imhotep." },
+            { name: "Temple of Isis", clue: "This temple on Philae Island was dedicated to the goddess Isis." },
+            { name: "Temple of Kom Ombo", clue: "This temple is unusual because it is dedicated to two gods: Sobek and Horus." },
+            { name: "Temple of Karnak", clue: "This massive complex in Luxor was the main religious center of the ancient Egyptian world." },
+            { name: "Cleopatra's Needle", clue: "This ancient obelisk was originally erected in Heliopolis and later moved to London and New York." },
+            { name: "Ramses II Temple", clue: "The grand temple of Ramses II is located at Abu Simbel, carved into a mountainside." },
+            { name: "The Red Pyramid", clue: "This pyramid, located in Dahshur, is one of the first true pyramids built in Egypt." },
+            { name: "The Bent Pyramid", clue: "This pyramid, also in Dahshur, is famous for its change in angle halfway up." },
+            { name: "The Great Sphinx of Giza", clue: "A colossal limestone statue with the body of a lion and the head of a pharaoh." },
+            { name: "Saqqara", clue: "The necropolis of ancient Memphis, famous for its Step Pyramid and tombs of pharaohs." },
+            { name: "Memphis", clue: "The ancient capital of Egypt, home to many temples and monumental statues." },
+            { name: "Siwa Oasis", clue: "This remote oasis in the Western Desert is famous for its Oracle of Amun and ancient ruins." },
+            { name: "Mount Sinai", clue: "The mountain where Moses is said to have received the Ten Commandments." },
+            { name: "Nile River", clue: "The longest river in the world, flowing through Egypt and central Africa." },
+            { name: "Alexandria", clue: "A coastal city founded by Alexander the Great, home to the ancient Library of Alexandria." },
+            { name: "Bibliotheca Alexandrina", clue: "A modern library in Alexandria, inspired by the ancient Library of Alexandria." },
+            { name: "Cairo Citadel", clue: "A medieval Islamic Cairo fortification, originally built by Salah ad-Din." },
+            { name: "Suez Canal", clue: "A man-made waterway connecting the Mediterranean Sea to the Red Sea." },
+            { name: "King Tutankhamun's Tomb", clue: "The famous tomb of the 'Boy King' in the Valley of the Kings, discovered in 1922." },
+            { name: "Coptic Cairo", clue: "A district in Cairo with ancient Christian churches and a Jewish synagogue." },
+            { name: "The Egyptian Museum", clue: "A world-famous museum in Cairo housing an extensive collection of ancient Egyptian artifacts." },
+            { name: "The White Desert", clue: "A stark, stunning desert area in Egypt with unique chalk rock formations." },
+            { name: "The Monastery of Saint Catherine", clue: "A historic Christian monastery located at the base of Mount Sinai." },
+            { name: "The Temple of Philae", clue: "This temple dedicated to the goddess Isis was relocated to Agilkia Island after the construction of the Aswan High Dam." },
+            { name: "Tomb of Queen Nefertari", clue: "A beautifully decorated tomb of Ramses II’s beloved wife, Nefertari, in the Valley of the Queens." },
+            { name: "The Catacombs of Kom el Shoqafa", clue: "Ancient tombs in Alexandria that blend Egyptian, Greek, and Roman architectural styles." },
+            { name: "The Valley of the Queens", clue: "The burial site of the wives and children of the pharaohs of the New Kingdom." },
+            { name: "The Solar Boat Museum", clue: "This museum near the Pyramids of Giza houses an ancient boat used for the pharaoh’s journey to the afterlife." },
+            { name: "The Valley of the Nobles", clue: "A necropolis near Luxor with tombs of important officials and nobles from ancient Egypt." },
+            { name: "The Tomb of Seti I", clue: "One of the most elaborately decorated tombs in the Valley of the Kings, belonging to the pharaoh Seti I." },
+            { name: "The Temple of Abydos", clue: "An ancient Egyptian temple dedicated to Osiris, located in Abydos." },
+            { name: "The Temple of Hatshepsut", clue: "An impressive mortuary temple dedicated to the female pharaoh Hatshepsut." },
+            { name: "The Oasis of Bahariya", clue: "A desert oasis known for its Black Desert and Golden Mummies." },
+            { name: "The Tomb of Ramses VI", clue: "A richly decorated tomb located in the Valley of the Kings, famous for its colorful wall paintings." },
+            { name: "The Valley of the Artists", clue: "A site near the Valley of the Kings, known for the tombs of ancient Egyptian artists." },
+            { name: "The Temple of Seti I", clue: "A large temple complex built by Seti I, located in Abydos." },
+            { name: "The Monument to the Unknown Soldier", clue: "A memorial in Cairo dedicated to Egypt's fallen soldiers." },
+            { name: "The Qaitbay Citadel", clue: "A historic defensive fortress located on the Mediterranean Sea coast in Alexandria." },
+            { name: "The Hanging Church", clue: "One of the oldest Coptic Christian churches in Cairo, built above the gatehouse of a Roman fortress." },
+            { name: "The Mosque of Muhammad Ali", clue: "A prominent mosque in Cairo built by Muhammad Ali Pasha in the 19th century." },
+            { name: "The Temple of Taposiris Magna", clue: "An ancient Egyptian temple located near Alexandria, dedicated to the god Osiris." },
+            { name: "The Coptic Museum", clue: "A museum in Cairo that displays artifacts related to Egypt's Coptic Christian history." },
+            { name: "The Lake Moeris", clue: "An ancient man-made lake located in the Faiyum Oasis, used in irrigation." },
+            { name: "The Nubian Museum", clue: "A museum in Aswan showcasing the history and culture of the Nubian people." },
+            { name: "The Tomb of Amunherkhepeshef", clue: "The tomb of a prince from the 19th Dynasty of Egypt, located in the Valley of the Kings." },
+            { name: "The Roman Theater", clue: "An ancient Roman theater located in the city of Alexandria." },
+            { name: "The Nile River Cruise", clue: "A popular tourist experience that takes visitors through Egypt along the Nile River." },
+            { name: "The Great Hypostyle Hall", clue: "A large hall in the Karnak Temple at Luxor, famous for its 134 massive columns." },
+            { name: "The Temple of Hathor", clue: "A large temple in Dendera dedicated to the goddess Hathor." },
+            { name: "The Mummification Museum", clue: "A museum in Luxor dedicated to the ancient Egyptian art of mummification." },
+            { name: "The Mosque of Ibn Tulun", clue: "A historic mosque in Cairo, one of the oldest and best-preserved in Egypt." },
+            { name: "The Citadel of Alexandria", clue: "A historic fortification located on the Mediterranean coast in Alexandria." },
+            { name: "The Great Library of Alexandria", clue: "The ancient library that once housed one of the largest collections of manuscripts in the world." }
+        ];
+
+        // Initialize score and question index
+        let score = 0;
+        let currentQuestionIndex = 0;
+
+        // Function to load the current question
+        function loadQuestion() {
+            const question = landmarks[currentQuestionIndex];
+            document.querySelector('.clue').textContent = `Clue: ${question.clue}`;
+            document.querySelector('#user-input').value = '';
+            document.querySelector('#result').textContent = '';
+        }
+
+        // Function to check the player's answer
+        function checkAnswer() {
+            const userAnswer = document.querySelector('#user-input').value.trim().toLowerCase();
+            const correctAnswer = landmarks[currentQuestionIndex].name.toLowerCase();
+            
+            if (userAnswer === correctAnswer) {
+                score++;
+                document.querySelector('#result').textContent = 'Correct! Well done.';
+            } else {
+                document.querySelector('#result').textContent = `Oops! The correct answer was: ${landmarks[currentQuestionIndex].name}.`;
+            }
+
+            // Update score
+            document.querySelector('#score').textContent = `Score: ${score}`;
+
+            // Move to the next question or end the game
+            currentQuestionIndex++;
+            if (currentQuestionIndex < landmarks.length) {
+                setTimeout(loadQuestion, 2000); // Load next question after 2 seconds
+            } else {
+                setTimeout(() => {
+                    document.querySelector('#result').textContent = `Game Over! Your final score is ${score}.`;
+                    document.querySelector('#score').textContent = '';
+                }, 2000);
+            }
+        }
+
+        // Start the game by loading the first question
+        loadQuestion();
+    </script>
+</body>
+</html>
